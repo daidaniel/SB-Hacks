@@ -63,10 +63,10 @@ class playGame extends Phaser.Scene {
         platforms = this.physics.add.staticGroup();
 
         //don't forget to set new hitboxes
-        platforms.create(1280, 0, "ground").setScale(0.5,6).refreshBody();
-        platforms.create(1280, 640, "ground").setScale(0.5,6);
-        platforms.create(0, 640, "ground").setScale(0.5,6);
-        platforms.create(0, 0, "ground").setScale(0.5,6);
+        platforms.create(1280, 0, "ground").setScale(0.25,3).refreshBody();
+        platforms.create(1280, 640, "ground").setScale(0.25,3).refreshBody();
+        platforms.create(0, 640, "ground").setScale(0.25,3).refreshBody();
+        platforms.create(0, 0, "ground").setScale(0.25,3).refreshBody();
 
         //player code START
         player.sprite = this.physics.add.sprite(100, 450, "dude");

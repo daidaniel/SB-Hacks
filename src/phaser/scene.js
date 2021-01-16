@@ -1,42 +1,72 @@
-import Phaser from "phaser";
+import Phaser, { Game } from "phaser";
 import skyImg from "../assets/sky.png";
 import groundImg from "../assets/platform.png";
-import starImg from "../assets/star.png";
+import tpImg from "../assets/tp.png";
 import bombImg from "../assets/bomb.png";
 import dudeSprite from "../assets/dude.png";
+import dude2Sprite from "../assets/dude2.png";
 
 var player = {
+    name: 'player',
     sprite: null,
     covid: false,
     handsan: false,
     tp: false,
     dead: false,
+    collide: false,
+    scoreText: '',
 };
 var bot = {
+    name: 'bot',
     sprite: null,
     covid: true,
     handsan: false,
     tp: false,
     dead: false,
+    collide: false,
+    scoreText: '',
 };
-var star;
+var tp;
 var platforms;
 var cursors;
+var noDir;
+var bnoDir;
 
 const vel = 180;
+const accel = 200;
 
-function collectStar(player, star) {
-    star.disableBody(true, true);
-    
-    //player.tp = true;
+
+function die(p) {
+    p.disableBody(true, true);
+}
+
+function collectTP(p, tp) {
+    tp.disableBody(true, true);
+    if (p === player.sprite && player.tp == false){
+        player.tp = true;
+        player.scoreText.setText(player.name + ': ' + player.tp);
+    }
+    else{
+        bot.tp = true; 
+        bot.scoreText.setText(bot.name + ': ' + bot.tp); 
+    }
+}
+
+function getRandom(max) {
+    return Math.floor(Math.random() * Math.floor(max));
 }
 
 function collision(p1, p2) {
-    if(p1.covid === true) {
-
-    }
-    else if(p2.covid === true) {
-
+    const rand = getRandom(20) === 1;
+    
+    if (p1.covid != p2.covid && rand) {
+        if (p1.covid === true) {
+            p2.covid = true;
+            console.log(p2.covid);
+        } else if (p2.covid === true) {
+            p1.covid = true;
+            console.log(p1.covid);
+        }
     }
 }
 
@@ -47,66 +77,60 @@ class playGame extends Phaser.Scene {
     preload() {
         this.load.image("sky", skyImg);
         this.load.image("ground", groundImg);
-        this.load.image("star", starImg);
+        this.load.image("tp", tpImg);
         this.load.image("bomb", bombImg);
         this.load.spritesheet("dude", dudeSprite, {
             frameWidth: 32,
-            frameHeight: 48,
+            frameHeight: 32,
+        });
+        this.load.spritesheet("dude2", dude2Sprite, {
+            frameWidth: 32,
+            frameHeight: 32,
         });
     }
     create() {
-        //background START
+        //background tpT
         this.add.image(0, 0, "sky").setOrigin(0, 0);
         //background END
 
-        //level code START
+        //level code tpT
         platforms = this.physics.add.staticGroup();
 
         //don't forget to set new hitboxes
-        platforms.create(1280, 0, "ground").setScale(0.25,3).refreshBody();
-        platforms.create(1280, 640, "ground").setScale(0.25,3).refreshBody();
-        platforms.create(0, 640, "ground").setScale(0.25,3).refreshBody();
-        platforms.create(0, 0, "ground").setScale(0.25,3).refreshBody();
+        platforms.create(1280, 0, "ground").setScale(26, 0.5).refreshBody(); //top
+        platforms.create(1280, 640, "ground").setScale(0.5, 13).refreshBody(); //right
+        platforms.create(0, 640, "ground").setScale(26, 0.5).refreshBody(); //bottom
+        platforms.create(0, 0, "ground").setScale(0.5, 13).refreshBody(); //left
 
-        //player code START
-        player.sprite = this.physics.add.sprite(100, 450, "dude");
+        //player code tpT
+        player.sprite = this.physics.add.sprite(100, 450, "dude").setInteractive();
         player.sprite.body.allowGravity = false;
         player.sprite.setCollideWorldBounds(true);
-        player.sprite.body.pushable = false;
+        player.sprite.body.setBounce(0.5);
+        
+        this.anims.create({
+            key: "turn",
+            frames: [{ key: "dude", frame: 0 }],
+        });
+        
+        this.anims.create({
+            key: "up",
+            frames: [{ key: "dude", frame: 1 }],
+        });
 
+        this.anims.create({
+            key: "down",
+            frames: [{ key: "dude", frame: 2 }],
+        });
+        
         this.anims.create({
             key: "left",
-            frames: this.anims.generateFrameNumbers("dude", {
-                start: 0,
-                end: 3,
-            }),
-            frameRate: 10,
-            repeat: -1,
+            frames: [{ key: "dude", frame: 3 }],
         });
-
-        this.anims.create({
-            key: "turnX",
-            frames: [{ key: "dude", frame: 4 }],
-            frameRate: 20,
-        });
-
-        /*
-        //for when we need a turnY
-        this.anims.create({
-            key: "turnY",
-            frames: [{ key: "dude", frame: 4 }],
-            frameRate: 20,
-        });
-        */
 
         this.anims.create({
             key: "right",
-            frames: this.anims.generateFrameNumbers("dude", {
-                start: 5,
-                end: 8,
-            }),
-            frameRate: 10,
-            repeat: -1,
+            frames: [{ key: "dude", frame: 4 }],
         });
 
         this.physics.add.collider(player.sprite, platforms);
@@ -114,23 +138,56 @@ class playGame extends Phaser.Scene {
 
         //level objects
 
-        star = this.physics.add.sprite(600, 150, "star");
-        star.body.allowGravity = false;
+        tp = this.physics.add.sprite(600, 150, "tp");
+        tp.body.allowGravity = false;
 
-        this.physics.add.collider(star, platforms);
-        this.physics.add.overlap(player.sprite, star, collectStar, null, this);
+        this.physics.add.overlap(player.sprite, tp, collectTP, null, this);
 
-        bot.sprite = this.physics.add.sprite(500, 450, "dude");
+        bot.sprite = this.physics.add.sprite(500, 450, "dude2").setInteractive();
         bot.sprite.body.allowGravity = false;
         bot.sprite.setCollideWorldBounds(true);
-        bot.sprite.body.setBounceX(0.1);
-        bot.sprite.body.setBounceY(0.1);
-        bot.sprite.body.pushable = false;
+        bot.sprite.body.setBounce(0.5);
 
-        this.physics.add.collider(bot.sprite, player.sprite);
-        this.physics.add.collider(bot.sprite, star);
-        this.physics.add.overlap(bot.sprite, player.sprite, collision, null, this);
-        this.physics.add.overlap(bot.sprite, star, collectStar, null, this);
+        this.physics.add.collider(bot.sprite, platforms);
+
+        this.anims.create({
+            key: "turn2",
+            frames: [{ key: "dude2", frame: 0 }],
+        });
+        
+        this.anims.create({
+            key: "up2",
+            frames: [{ key: "dude2", frame: 1 }],
+        });
+
+        this.anims.create({
+            key: "down2",
+            frames: [{ key: "dude2", frame: 2 }],
+        });
+        
+        this.anims.create({
+            key: "left2",
+            frames: [{ key: "dude2", frame: 3 }],
+        });
+
+        this.anims.create({
+            key: "right2",
+            frames: [{ key: "dude2", frame: 4 }],
+        });
+
+        this.physics.add.collider(
+            player.sprite,
+            bot.sprite,
+            function ()
+            {
+                collision(player, bot);
+            });
+
+        this.physics.add.overlap(bot.sprite, tp, collectTP, null, this);
+
+        player.scoreText = this.add.text(30, 35, 'player: false initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
+        bot.scoreText = this.add.text(30, 70, 'bot: false initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
+
         //level code END
     }
     update() {
@@ -147,28 +204,107 @@ class playGame extends Phaser.Scene {
             right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
         });
 
-        if (cursors.up.isDown || cursors.w.isDown) {
-            player.sprite.setVelocityY(-vel);
-        } else if (cursors.down.isDown || cursors.s.isDown) {
-            player.sprite.setVelocityY(vel);
-        } else {
-            player.sprite.setVelocityY(0);
+        bnoDir = true;
+        noDir = true;
 
-            //player.sprite.anims.play("turnY");
+        if (cursors.up.isDown) {
+            bot.sprite.setVelocityY(-vel);
+            bot.sprite.anims.play("up2", true);
+            bnoDir = false;
+        }
+        else if (cursors.down.isDown) {
+            bot.sprite.setVelocityY(vel);
+            bot.sprite.anims.play("down2", true);
+            bnoDir = false;
+        }
+        else {
+            bot.sprite.setVelocityY(0);
+        }
+
+        if (cursors.left.isDown) {
+            bot.sprite.setVelocityX(-vel);
+            bot.sprite.anims.play("left2", true);
+            bnoDir = false;
+        }
+        else if (cursors.right.isDown) {
+            bot.sprite.setVelocityX(vel);
+            bot.sprite.anims.play("right2", true);
+            bnoDir = false;
+        }
+        else {
+            bot.sprite.setVelocityX(0);
+        }
+
+        if (bnoDir) {
+            bot.sprite.anims.play("turn2");
+        }
+
+        if (cursors.w.isDown) {
+            player.sprite.setVelocityY(-vel);
+            player.sprite.anims.play("up", true);
+            noDir = false;
+        }
+        else if (cursors.s.isDown) {
+            player.sprite.setVelocityY(vel);
+            player.sprite.anims.play("down", true);
+            noDir = false;
+        }
+        else {
+            player.sprite.setVelocityY(0);
+        }
+
+        if (cursors.a.isDown) {
+            player.sprite.setVelocityX(-vel);
+            player.sprite.anims.play("left", true);
+            noDir = false;
+        }
+        else if (cursors.d.isDown) {
+            player.sprite.setVelocityX(vel);
+            player.sprite.anims.play("right", true);
+            noDir = false;
+        }
+        else {
+            player.sprite.setVelocityX(0);
+        }
+
+        if (noDir) {
+            player.sprite.anims.play("turn");
+        }
+
+        /*if (cursors.up.isDown || cursors.w.isDown) {
+            player.sprite.setVelocityY(-vel);
+            player.sprite.anims.play("up", true);
+            noDir = false;
+        }
+        else if (cursors.down.isDown || cursors.s.isDown) {
+            player.sprite.setVelocityY(vel);
+            player.sprite.anims.play("down", true);
+            noDir = false;
         }
 
         if (cursors.left.isDown || cursors.a.isDown) {
             player.sprite.setVelocityX(-vel);
-
             player.sprite.anims.play("left", true);
-        } else if (cursors.right.isDown || cursors.d.isDown) {
+            noDir = false;
+        }
+        else if (cursors.right.isDown || cursors.d.isDown) {
             player.sprite.setVelocityX(vel);
-
             player.sprite.anims.play("right", true);
-        } else {
-            player.sprite.setVelocityX(0);
+            noDir = false;
+        }
 
-            player.sprite.anims.play("turnX");
+        if (noDir) {
+            player.sprite.setVelocityX(0);
+            player.sprite.setVelocityY(0);
+            player.sprite.anims.play("turn");
+        }*/
+
+        if(player.covid) {
+            var timedEvent = this.time.delayedCall(30000, die, [player.sprite], this);
+        }
+        
+        if(bot.covid) {
+            var timedEvent = this.time.delayedCall(30000, die, [bot.sprite], this);
         }
     }
 }

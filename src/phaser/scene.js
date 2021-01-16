@@ -22,7 +22,6 @@ var bot = {
 var star;
 var platforms;
 var cursors;
-var noDir;
 
 const vel = 180;
 
@@ -52,7 +51,7 @@ class playGame extends Phaser.Scene {
         this.load.image("bomb", bombImg);
         this.load.spritesheet("dude", dudeSprite, {
             frameWidth: 32,
-            frameHeight: 32,
+            frameHeight: 48,
         });
     }
     create() {
@@ -74,32 +73,41 @@ class playGame extends Phaser.Scene {
         player.sprite.body.allowGravity = false;
         player.sprite.setCollideWorldBounds(true);
         player.sprite.body.pushable = false;
-        
+
         this.anims.create({
-            key: "turn",
-            frames: [{ key: "dude", frame: 0 }],
-        });
-        
-        this.anims.create({
-            key: "up",
-            frames: [{ key: "dude", frame: 1 }],
+            key: "left",
+            frames: this.anims.generateFrameNumbers("dude", {
+                start: 0,
+                end: 3,
+            }),
+            frameRate: 10,
+            repeat: -1,
         });
 
         this.anims.create({
-            key: "down",
-            frames: [{ key: "dude", frame: 2 }],
+            key: "turnX",
+            frames: [{ key: "dude", frame: 4 }],
+            frameRate: 20,
         });
-        
+
+        /*
+        //for when we need a turnY
         this.anims.create({
-            key: "left",
-            frames: [{ key: "dude", frame: 3 }],
+            key: "turnY",
+            frames: [{ key: "dude", frame: 4 }],
+            frameRate: 20,
         });
+        */
 
         this.anims.create({
             key: "right",
-            frames: [{ key: "dude", frame: 4 }],
+            frames: this.anims.generateFrameNumbers("dude", {
+                start: 5,
+                end: 8,
+            }),
+            frameRate: 10,
+            repeat: -1,
         });
-
 
         this.physics.add.collider(player.sprite, platforms);
         //player code END
@@ -139,34 +147,28 @@ class playGame extends Phaser.Scene {
             right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
         });
 
-        noDir = true;
-
         if (cursors.up.isDown || cursors.w.isDown) {
             player.sprite.setVelocityY(-vel);
-            player.sprite.anims.play("up", true);
-            noDir = false;
-        }
-        else if (cursors.down.isDown || cursors.s.isDown) {
+        } else if (cursors.down.isDown || cursors.s.isDown) {
             player.sprite.setVelocityY(vel);
-            player.sprite.anims.play("down", true);
-            noDir = false;
+        } else {
+            player.sprite.setVelocityY(0);
+
+            //player.sprite.anims.play("turnY");
         }
 
         if (cursors.left.isDown || cursors.a.isDown) {
             player.sprite.setVelocityX(-vel);
-            player.sprite.anims.play("left", true);
-            noDir = false;
-        }
-        else if (cursors.right.isDown || cursors.d.isDown) {
-            player.sprite.setVelocityX(vel);
-            player.sprite.anims.play("right", true);
-            noDir = false;
-        }
 
-        if (noDir) {
+            player.sprite.anims.play("left", true);
+        } else if (cursors.right.isDown || cursors.d.isDown) {
+            player.sprite.setVelocityX(vel);
+
+            player.sprite.anims.play("right", true);
+        } else {
             player.sprite.setVelocityX(0);
-            player.sprite.setVelocityY(0);
-            player.sprite.anims.play("turn");
+
+            player.sprite.anims.play("turnX");
         }
     }
 }

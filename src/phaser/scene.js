@@ -15,6 +15,8 @@ var player = {
     dead: false,
     collide: false,
     scoreText: '',
+    covidText: '',
+    timedEvent: null,
 };
 var bot = {
     name: 'bot',
@@ -25,6 +27,8 @@ var bot = {
     dead: false,
     collide: false,
     scoreText: '',
+    covidText: '',
+    timedEvent: null,
 };
 var tp;
 var platforms;
@@ -185,9 +189,11 @@ class playGame extends Phaser.Scene {
 
         this.physics.add.overlap(bot.sprite, tp, collectTP, null, this);
 
-        player.scoreText = this.add.text(30, 35, 'player: false initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
-        bot.scoreText = this.add.text(30, 70, 'bot: false initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
+        player.scoreText = this.add.text(30, 35, 'player: initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
+        bot.scoreText = this.add.text(30, 70, 'bot: initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
 
+        player.covidText = this.add.text(250, 35, '', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
+        bot.covidText = this.add.text(250, 70, '', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
         //level code END
     }
     update() {
@@ -300,11 +306,17 @@ class playGame extends Phaser.Scene {
         }*/
 
         if(player.covid) {
-            var timedEvent = this.time.delayedCall(30000, die, [player.sprite], this);
+            if(!player.timedEvent) {
+                player.timedEvent = this.time.delayedCall(30000, die, [player.sprite], this);
+            }
+            player.covidText.setText('covid timer: ' + (30 - (30 *player.timedEvent.getProgress())).toString().substr(0, 4));
         }
         
         if(bot.covid) {
-            var timedEvent = this.time.delayedCall(30000, die, [bot.sprite], this);
+            if(!bot.timedEvent) {
+                bot.timedEvent = this.time.delayedCall(30000, die, [bot.sprite], this);
+            }
+            bot.covidText.setText('covid timer: ' + (30 - (30 *bot.timedEvent.getProgress())).toString().substr(0, 4));
         }
     }
 }

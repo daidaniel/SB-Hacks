@@ -15,4 +15,4 @@ The 2020 Experience is a hectic 1v1 local multiplayer game helping make your 202
 
 This project was created using the Phaser 3 HTML5 game framework, React.js, and JavaScript.
 
-Music: ["Music to Delight"](https://incompetech.filmmusic.io/song/4103-music-to-delight/) by [Kevin Macleod](https://incompetech.filmmusic.io/artists/kevin-macleod) used under the [Creative Commons License](https://incompetech.filmmusic.io/standard-license).
+Music: ["Music to Delight"](https://incompetech.filmmusic.io/song/4103-music-to-delight/) by [Kevin MacLeod](https://incompetech.filmmusic.io/artists/kevin-macleod) used under the [Creative Commons License](https://incompetech.filmmusic.io/standard-license).

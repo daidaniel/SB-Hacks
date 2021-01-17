@@ -1,10 +1,10 @@
-# SB-Hacks
+# SB-Hacks project: The 2020 Experience
 
 Before running, install:
 <pre><code>npm install
 </code></pre>
 
-To run (on localhost:8080):
+To run:
 <pre><code>npm start
 </code></pre>
 

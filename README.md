@@ -2,7 +2,7 @@
 
 Make sure you have [Node.js](https://nodejs.org/en/download/) installed.
 
-CLone the repository/download the ZIP file, navigate to the directory and install dependencies:
+Clone the repository/download the ZIP file, navigate to the directory and install dependencies:
 <pre><code>npm install
 </code></pre>
 

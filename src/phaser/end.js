@@ -1,6 +1,7 @@
 import Phaser, { Game } from "phaser";
 import grassImg from "../assets/grass.png";
 import overlayImg from "../assets/overlay.png";
+import restartImg from "../assets/restart.png";
 
 var message = "";
 var play;
@@ -18,9 +19,11 @@ class EndScene extends Phaser.Scene {
     preload() {
         this.load.image("grass", grassImg);
         this.load.image("overlay", overlayImg);
+        this.load.image("restart", restartImg);
     }
 
     create() {
+        this.scene.stop("PlayGame");
         this.add.image(0, 0, "grass").setOrigin(0, 0);
         this.add.image(0, 0, "overlay").setOrigin(0, 0);
         message = this.add
@@ -38,7 +41,7 @@ class EndScene extends Phaser.Scene {
         }
 
         play = this.add
-            .text(640, 450, "RESTART")
+            .image(640, 450, "restart")
             .setOrigin(0.5, 0.5)
             .setInteractive()
             .on("pointerup", () => {

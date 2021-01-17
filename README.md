@@ -4,7 +4,7 @@ Before running, install:
 <pre><code>npm install
 </code></pre>
 
-To run:
+To run a local server on your browser:
 <pre><code>npm start
 </code></pre>
 

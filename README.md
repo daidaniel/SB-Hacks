@@ -13,4 +13,4 @@ The 2020 Experience is a hectic 1v1 local multiplayer game helping make your 202
 
 ![screenshot](https://github.com/danielsdai/SB-Hacks/blob/main/screenshot.JPG)
 
-This project was written using the Phaser 3 HTML5 game engine, React.js, and JavaScript.
+This project was created using the Phaser 3 HTML5 game engine, React.js, and JavaScript.

@@ -1,4 +1,5 @@
 import Phaser, { Game } from "phaser";
+import logoImg from "../assets/logo.png";
 import grassImg from "../assets/grass.png";
 import groundImg from "../assets/platform.png";
 import tpImg from "../assets/tp.png";
@@ -6,8 +7,9 @@ import bombImg from "../assets/bomb.png";
 import dudeSprite from "../assets/dude.png";
 import dude2Sprite from "../assets/dude2.png";
 import cpuSprite from "../assets/cpu.png";
-import houseSprite from "../assets/house.png";
-import house2Sprite from "../assets/house2.png";
+import houseImg from "../assets/house.png";
+import house2Img from "../assets/house2.png";
+// import musictodelight from "../assets/musictodelight.mp3";
 
 var cpu = {
     name: "cpu",
@@ -56,6 +58,7 @@ var player = {
     icon: null,
     covidText: "",
     timedEvent: null,
+    win: false,
 };
 var player2 = {
     name: "player2",
@@ -68,10 +71,13 @@ var player2 = {
     icon: null,
     covidText: "",
     timedEvent: null,
+    win: false,
 };
 var tp;
 var platforms;
 var cursors;
+var house;
+var house2;
 
 const vel = 180;
 const accel = 200;
@@ -102,7 +108,7 @@ function getRandom(max) {
 }
 
 function collision(p1, p2) {
-    const rand = getRandom(5) === 1;
+    const rand = getRandom(4) === 1;
 
     if (p1.covid != p2.covid && rand) {
         if (p1.covid) {
@@ -155,11 +161,24 @@ function collision(p1, p2) {
     }
 }
 
+function checkWin(p) {
+    if (p.tp) p.win = true;
+}
+
+function moveTP(tp, dir, val) {
+    if (dir === "y") {
+        tp.body.y += val;
+    } else {
+        tp.body.x += val;
+    }
+}
+
 class playGame extends Phaser.Scene {
     constructor() {
         super("PlayGame");
     }
     preload() {
+        this.load.image("logo", logoImg);
         this.load.image("grass", grassImg);
         this.load.image("ground", groundImg);
         this.load.image("tp", tpImg);
@@ -176,8 +195,14 @@ class playGame extends Phaser.Scene {
             frameWidth: 32,
             frameHeight: 32,
         });
+        this.load.image("house", houseImg);
+        this.load.image("house2", house2Img);
+        // this.load.audio("musictodelight", musictodelight);
     }
     create() {
+        // let sfx = this.sound.add("musictodelight", {loop: true});
+        // sfx.play();
+
         //background START
         this.add.image(0, 0, "grass").setOrigin(0, 0);
         //background END
@@ -193,7 +218,7 @@ class playGame extends Phaser.Scene {
 
         //player code START
         player.sprite = this.physics.add
-            .sprite(200, 300, "dude")
+            .sprite(120, 580, "dude")
             .setInteractive();
         player.sprite.body.allowGravity = false;
         player.sprite.setCollideWorldBounds(true);
@@ -247,7 +272,7 @@ class playGame extends Phaser.Scene {
         this.physics.add.overlap(player.sprite, tp, collectTP, null, this);
 
         player2.sprite = this.physics.add
-            .sprite(200, 450, "dude2")
+            .sprite(1160, 580, "dude2")
             .setInteractive();
         player2.sprite.body.allowGravity = false;
         player2.sprite.setCollideWorldBounds(true);
@@ -296,12 +321,12 @@ class playGame extends Phaser.Scene {
             collision(player, player2);
         });
 
-        cpu.sprite = this.physics.add.sprite(1000, 200, "cpu").setInteractive();
+        cpu.sprite = this.physics.add.sprite(100, 280, "cpu").setInteractive();
         cpu.sprite.body.allowGravity = false;
         cpu.sprite.setCollideWorldBounds(true);
         cpu.sprite.body.setBounce(1);
-        cpu.sprite.setVelocityX(-vel);
-        cpu.sprite.setVelocityY(vel);
+        cpu.sprite.setVelocityX(vel * 1.1);
+        cpu.sprite.setVelocityY(vel * 1.1);
 
         this.physics.add.collider(player.sprite, cpu.sprite, function () {
             collision(player, cpu);
@@ -313,14 +338,12 @@ class playGame extends Phaser.Scene {
 
         this.physics.add.collider(cpu.sprite, platforms);
 
-        cpu2.sprite = this.physics.add
-            .sprite(1000, 300, "cpu")
-            .setInteractive();
+        cpu2.sprite = this.physics.add.sprite(360, 180, "cpu").setInteractive();
         cpu2.sprite.body.allowGravity = false;
         cpu2.sprite.setCollideWorldBounds(true);
         cpu2.sprite.body.setBounce(1);
-        cpu2.sprite.setVelocityX(-vel);
-        cpu2.sprite.setVelocityY(-vel);
+        cpu2.sprite.setVelocityX(vel * 1.1);
+        cpu2.sprite.setVelocityY(-vel * 1.1);
 
         this.physics.add.collider(player.sprite, cpu2.sprite, function () {
             collision(player, cpu2);
@@ -332,14 +355,12 @@ class playGame extends Phaser.Scene {
 
         this.physics.add.collider(cpu2.sprite, platforms);
 
-        cpu3.sprite = this.physics.add
-            .sprite(1000, 400, "cpu")
-            .setInteractive();
+        cpu3.sprite = this.physics.add.sprite(920, 180, "cpu").setInteractive();
         cpu3.sprite.body.allowGravity = false;
         cpu3.sprite.setCollideWorldBounds(true);
         cpu3.sprite.body.setBounce(1);
-        cpu3.sprite.setVelocityX(-vel);
-        cpu3.sprite.setVelocityY(vel);
+        cpu3.sprite.setVelocityX(-vel * 1.1);
+        cpu3.sprite.setVelocityY(-vel * 1.1);
 
         this.physics.add.collider(player.sprite, cpu3.sprite, function () {
             collision(player, cpu3);
@@ -352,13 +373,13 @@ class playGame extends Phaser.Scene {
         this.physics.add.collider(cpu3.sprite, platforms);
 
         cpu4.sprite = this.physics.add
-            .sprite(1000, 500, "cpu")
+            .sprite(1180, 280, "cpu")
             .setInteractive();
         cpu4.sprite.body.allowGravity = false;
         cpu4.sprite.setCollideWorldBounds(true);
         cpu4.sprite.body.setBounce(1);
-        cpu4.sprite.setVelocityX(-vel);
-        cpu4.sprite.setVelocityY(-vel);
+        cpu4.sprite.setVelocityX(-vel * 1.1);
+        cpu4.sprite.setVelocityY(vel * 1.1);
 
         this.physics.add.collider(player.sprite, cpu4.sprite, function () {
             collision(player, cpu4);
@@ -422,6 +443,47 @@ class playGame extends Phaser.Scene {
             fill: "#000",
         });
         //level code END
+
+        //houses code
+        house = this.physics.add.sprite(200, 603, "house").setImmovable();
+        this.physics.add.collider(house, player.sprite, function () {
+            checkWin(player);
+        });
+        this.physics.add.collider(house, player2.sprite);
+        this.physics.add.collider(house, cpu.sprite);
+        this.physics.add.collider(house, cpu2.sprite);
+        this.physics.add.collider(house, cpu3.sprite);
+        this.physics.add.collider(house, cpu4.sprite);
+        this.physics.add.overlap(
+            house,
+            tp,
+            function () {
+                moveTP(tp, "x", 50);
+            },
+            null,
+            this
+        );
+
+        house2 = this.physics.add.sprite(1080, 603, "house2").setImmovable();
+        this.physics.add.collider(house2, player2.sprite, function () {
+            checkWin(player2);
+        });
+        this.physics.add.collider(house2, player.sprite);
+        this.physics.add.collider(house2, cpu.sprite);
+        this.physics.add.collider(house2, cpu2.sprite);
+        this.physics.add.collider(house2, cpu3.sprite);
+        this.physics.add.collider(house2, cpu4.sprite);
+        this.physics.add.overlap(
+            house2,
+            tp,
+            function () {
+                moveTP(tp, "x", 50);
+            },
+            null,
+            this
+        );
+
+        this.add.image(640, 75, "logo");
     }
     update() {
         //keyboard controls
@@ -439,57 +501,57 @@ class playGame extends Phaser.Scene {
 
         if (cursors.w.isDown && cursors.d.isDown) {
             player.tp
-                ? player.sprite.setVelocityX(vel * 0.92)
+                ? player.sprite.setVelocityX(vel * 0.88)
                 : player.sprite.setVelocityX(vel);
             player.tp
-                ? player.sprite.setVelocityY(-vel * 0.92)
+                ? player.sprite.setVelocityY(-vel * 0.88)
                 : player.sprite.setVelocityY(-vel);
             player.sprite.anims.play("upright", true);
         } else if (cursors.w.isDown && cursors.a.isDown) {
             player.tp
-                ? player.sprite.setVelocityX(-vel * 0.92)
+                ? player.sprite.setVelocityX(-vel * 0.88)
                 : player.sprite.setVelocityX(-vel);
             player.tp
-                ? player.sprite.setVelocityY(-vel * 0.92)
+                ? player.sprite.setVelocityY(-vel * 0.88)
                 : player.sprite.setVelocityY(-vel);
             player.sprite.anims.play("upleft", true);
         } else if (cursors.s.isDown && cursors.d.isDown) {
             player.tp
-                ? player.sprite.setVelocityX(vel * 0.92)
+                ? player.sprite.setVelocityX(vel * 0.88)
                 : player.sprite.setVelocityX(vel);
             player.tp
-                ? player.sprite.setVelocityY(vel * 0.92)
+                ? player.sprite.setVelocityY(vel * 0.88)
                 : player.sprite.setVelocityY(vel);
             player.sprite.anims.play("downright", true);
         } else if (cursors.s.isDown && cursors.a.isDown) {
             player.tp
-                ? player.sprite.setVelocityX(-vel * 0.92)
+                ? player.sprite.setVelocityX(-vel * 0.88)
                 : player.sprite.setVelocityX(-vel);
             player.tp
-                ? player.sprite.setVelocityY(vel * 0.92)
+                ? player.sprite.setVelocityY(vel * 0.88)
                 : player.sprite.setVelocityY(vel);
             player.sprite.anims.play("downleft", true);
         } else if (cursors.w.isDown) {
             player.sprite.setVelocityX(0);
             player.tp
-                ? player.sprite.setVelocityY(-vel * 0.92)
+                ? player.sprite.setVelocityY(-vel * 0.88)
                 : player.sprite.setVelocityY(-vel);
             player.sprite.anims.play("up", true);
         } else if (cursors.a.isDown) {
             player.tp
-                ? player.sprite.setVelocityX(-vel * 0.92)
+                ? player.sprite.setVelocityX(-vel * 0.88)
                 : player.sprite.setVelocityX(-vel);
             player.sprite.setVelocityY(0);
             player.sprite.anims.play("left", true);
         } else if (cursors.s.isDown) {
             player.sprite.setVelocityX(0);
             player.tp
-                ? player.sprite.setVelocityY(vel * 0.92)
+                ? player.sprite.setVelocityY(vel * 0.88)
                 : player.sprite.setVelocityY(vel);
             player.sprite.anims.play("down", true);
         } else if (cursors.d.isDown) {
             player.tp
-                ? player.sprite.setVelocityX(vel * 0.92)
+                ? player.sprite.setVelocityX(vel * 0.88)
                 : player.sprite.setVelocityX(vel);
             player.sprite.setVelocityY(0);
             player.sprite.anims.play("right", true);
@@ -501,57 +563,57 @@ class playGame extends Phaser.Scene {
 
         if (cursors.up.isDown && cursors.right.isDown) {
             player2.tp
-                ? player2.sprite.setVelocityX(vel * 0.92)
+                ? player2.sprite.setVelocityX(vel * 0.88)
                 : player2.sprite.setVelocityX(vel);
             player2.tp
-                ? player2.sprite.setVelocityY(-vel * 0.92)
+                ? player2.sprite.setVelocityY(-vel * 0.88)
                 : player2.sprite.setVelocityY(-vel);
             player2.sprite.anims.play("upright2", true);
         } else if (cursors.up.isDown && cursors.left.isDown) {
             player2.tp
-                ? player2.sprite.setVelocityX(-vel * 0.92)
+                ? player2.sprite.setVelocityX(-vel * 0.88)
                 : player2.sprite.setVelocityX(-vel);
             player2.tp
-                ? player2.sprite.setVelocityY(-vel * 0.92)
+                ? player2.sprite.setVelocityY(-vel * 0.88)
                 : player2.sprite.setVelocityY(-vel);
             player2.sprite.anims.play("upleft2", true);
         } else if (cursors.down.isDown && cursors.right.isDown) {
             player2.tp
-                ? player2.sprite.setVelocityX(vel * 0.92)
+                ? player2.sprite.setVelocityX(vel * 0.88)
                 : player2.sprite.setVelocityX(vel);
             player2.tp
-                ? player2.sprite.setVelocityY(vel * 0.92)
+                ? player2.sprite.setVelocityY(vel * 0.88)
                 : player2.sprite.setVelocityY(vel);
             player2.sprite.anims.play("downright2", true);
         } else if (cursors.down.isDown && cursors.left.isDown) {
             player2.tp
-                ? player2.sprite.setVelocityX(-vel * 0.92)
+                ? player2.sprite.setVelocityX(-vel * 0.88)
                 : player2.sprite.setVelocityX(-vel);
             player2.tp
-                ? player2.sprite.setVelocityY(vel * 0.92)
+                ? player2.sprite.setVelocityY(vel * 0.88)
                 : player2.sprite.setVelocityY(vel);
             player2.sprite.anims.play("downleft2", true);
         } else if (cursors.up.isDown) {
             player2.sprite.setVelocityX(0);
             player2.tp
-                ? player2.sprite.setVelocityY(-vel * 0.92)
+                ? player2.sprite.setVelocityY(-vel * 0.88)
                 : player2.sprite.setVelocityY(-vel);
             player2.sprite.anims.play("up2", true);
         } else if (cursors.left.isDown) {
             player2.tp
-                ? player2.sprite.setVelocityX(-vel * 0.92)
+                ? player2.sprite.setVelocityX(-vel * 0.88)
                 : player2.sprite.setVelocityX(-vel);
             player2.sprite.setVelocityY(0);
             player2.sprite.anims.play("left2", true);
         } else if (cursors.down.isDown) {
             player2.sprite.setVelocityX(0);
             player2.tp
-                ? player2.sprite.setVelocityY(vel * 0.92)
+                ? player2.sprite.setVelocityY(vel * 0.88)
                 : player2.sprite.setVelocityY(vel);
             player2.sprite.anims.play("down2", true);
         } else if (cursors.right.isDown) {
             player2.tp
-                ? player2.sprite.setVelocityX(vel * 0.92)
+                ? player2.sprite.setVelocityX(vel * 0.88)
                 : player2.sprite.setVelocityX(vel);
             player2.sprite.setVelocityY(0);
             player2.sprite.anims.play("right2", true);
@@ -580,6 +642,7 @@ class playGame extends Phaser.Scene {
             } else if (player.timedEvent.getProgress() === 1) {
                 player.covidText.setText("You died. :(");
                 player.dead = true;
+                player.disableBody(true, true);
             } else {
                 player.covidText.setText(
                     "You got COVID! Time until death: " +
@@ -590,9 +653,9 @@ class playGame extends Phaser.Scene {
             }
         }
 
-        if(player.dead) {
+        if (player.dead) {
             player.icon.setTexture("dude", 9);
-            if(player.tp) {
+            if (player.tp) {
                 tp.enableBody(
                     true,
                     player.sprite.body.x,
@@ -600,6 +663,7 @@ class playGame extends Phaser.Scene {
                     true,
                     true
                 );
+                player.tp = false;
             }
         }
 
@@ -622,6 +686,7 @@ class playGame extends Phaser.Scene {
             } else if (player2.timedEvent.getProgress() === 1) {
                 player2.covidText.setText("You died. :(");
                 player2.dead = true;
+                player2.disableBody(true, true);
             } else {
                 player2.covidText.setText(
                     "You got COVID! Time until death: " +
@@ -632,9 +697,9 @@ class playGame extends Phaser.Scene {
             }
         }
 
-        if(player2.dead) {
+        if (player2.dead) {
             player2.icon.setTexture("dude2", 9);
-            if(player2.tp) {
+            if (player2.tp) {
                 tp.enableBody(
                     true,
                     player2.sprite.body.x,
@@ -642,32 +707,53 @@ class playGame extends Phaser.Scene {
                     true,
                     true
                 );
+                player2.tp = false;
             }
         }
 
+        var text;
+        if (player.win || player2.dead) {
+            //display winscreen
+            text = this.add.text(640, 320, "PLAYER 1 WINS", {
+                fontFamily: "Roboto",
+                fontWeight: 700,
+                fontSize: "20px",
+                fill: "#000",
+            }).setOrigin(0,0);
+        }
+        if (player2.win || player.dead) {
+            //display winscreen
+            text = this.add.text(640, 320, "PLAYER 2 WINS", {
+                fontFamily: "Roboto",
+                fontWeight: 700,
+                fontSize: "20px",
+                fill: "#000",
+            }).setOrigin(0,0);
+        }
+
         if (cpu.sprite.body.velocity.x === 0) {
-            cpu.sprite.setVelocityX(-vel);
+            cpu.sprite.setVelocityX(vel * 1.1);
         }
         if (cpu.sprite.body.velocity.y === 0) {
-            cpu.sprite.setVelocityY(vel);
+            cpu.sprite.setVelocityY(vel * 1.1);
         }
         if (cpu2.sprite.body.velocity.x === 0) {
-            cpu2.sprite.setVelocityX(-vel);
+            cpu2.sprite.setVelocityX(vel * 1.1);
         }
         if (cpu2.sprite.body.velocity.y === 0) {
-            cpu2.sprite.setVelocityY(-vel);
+            cpu2.sprite.setVelocityY(-vel * 1.1);
         }
         if (cpu3.sprite.body.velocity.x === 0) {
-            cpu3.sprite.setVelocityX(-vel);
+            cpu3.sprite.setVelocityX(-vel * 1.1);
         }
         if (cpu3.sprite.body.velocity.y === 0) {
-            cpu3.sprite.setVelocityY(vel);
+            cpu3.sprite.setVelocityY(-vel * 1.1);
         }
         if (cpu4.sprite.body.velocity.x === 0) {
-            cpu4.sprite.setVelocityX(-vel);
+            cpu4.sprite.setVelocityX(-vel * 1.1);
         }
         if (cpu4.sprite.body.velocity.y === 0) {
-            cpu4.sprite.setVelocityY(-vel);
+            cpu4.sprite.setVelocityY(vel * 1.1);
         }
 
         if (player.tp) {
@@ -699,6 +785,13 @@ class playGame extends Phaser.Scene {
             cpu4.tpStatus.visible = true;
         } else {
             cpu4.tpStatus.visible = false;
+        }
+
+        if (tp.body.y < 150) {
+            tp.body.y += 20;
+        }
+        if (tp.body.y > 620) {
+            tp.body.y -= 20;
         }
     }
 }

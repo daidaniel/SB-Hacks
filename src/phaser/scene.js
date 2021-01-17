@@ -1,58 +1,99 @@
 import Phaser, { Game } from "phaser";
-import skyImg from "../assets/sky.png";
+import grassImg from "../assets/grass.png";
 import groundImg from "../assets/platform.png";
 import tpImg from "../assets/tp.png";
 import bombImg from "../assets/bomb.png";
 import dudeSprite from "../assets/dude.png";
 import dude2Sprite from "../assets/dude2.png";
+import cpuSprite from "../assets/cpu.png";
+import houseSprite from "../assets/house.png";
+import house2Sprite from "../assets/house2.png";
 
+var cpu = {
+    name: "cpu",
+    sprite: null,
+    covid: true,
+    tp: false,
+    tpStatus: null,
+    icon: null,
+    collide: false,
+};
+var cpu2 = {
+    name: "cpu2",
+    sprite: null,
+    covid: true,
+    tp: false,
+    tpStatus: null,
+    icon: null,
+    collide: false,
+};
+var cpu3 = {
+    name: "cpu3",
+    sprite: null,
+    covid: true,
+    tp: false,
+    tpStatus: null,
+    icon: null,
+    collide: false,
+};
+var cpu4 = {
+    name: "cpu4",
+    sprite: null,
+    covid: true,
+    tp: false,
+    tpStatus: null,
+    icon: null,
+    collide: false,
+};
 var player = {
-    name: 'player',
+    name: "player",
     sprite: null,
     covid: false,
     handsan: false,
     tp: false,
-    dead: false,
     collide: false,
-    scoreText: '',
-    covidText: '',
+    tpStatus: null,
+    icon: null,
+    covidText: "",
     timedEvent: null,
 };
-var bot = {
-    name: 'bot',
+var player2 = {
+    name: "player2",
     sprite: null,
-    covid: true,
+    covid: false,
     handsan: false,
     tp: false,
-    dead: false,
     collide: false,
-    scoreText: '',
-    covidText: '',
+    tpStatus: null,
+    icon: null,
+    covidText: "",
     timedEvent: null,
 };
 var tp;
 var platforms;
 var cursors;
-var noDir;
-var bnoDir;
 
 const vel = 180;
 const accel = 200;
-
 
 function die(p) {
     p.disableBody(true, true);
 }
 
 function collectTP(p, tp) {
-    tp.disableBody(true, true);
-    if (p === player.sprite && player.tp == false){
+    tp.disableBody(false, true);
+    if (p === player.sprite && player.tp === false) {
         player.tp = true;
-        player.scoreText.setText(player.name + ': ' + player.tp);
-    }
-    else{
-        bot.tp = true; 
-        bot.scoreText.setText(bot.name + ': ' + bot.tp); 
+    } else if (p === player2.sprite && player2.tp === false) {
+        player2.tp = true;
+    } else if (p === cpu.sprite && cpu.tp === false) {
+        cpu.tp = true;
+    } else if (p === cpu2.sprite && cpu2.tp === false) {
+        cpu2.tp = true;
+    } else if (p === cpu3.sprite && cpu3.tp === false) {
+        cpu3.tp = true;
+    } else {
+        cpu4.tp = true;
     }
 }
 
@@ -61,16 +102,56 @@ function getRandom(max) {
 }
 
 function collision(p1, p2) {
-    const rand = getRandom(20) === 1;
-    
+    const rand = getRandom(5) === 1;
+
     if (p1.covid != p2.covid && rand) {
-        if (p1.covid === true) {
+        if (p1.covid) {
             p2.covid = true;
             console.log(p2.covid);
-        } else if (p2.covid === true) {
+        } else if (p2.covid) {
             p1.covid = true;
             console.log(p1.covid);
         }
+    }
+
+    if (p1.tp || p2.tp) {
+        if (p1.sprite.body.x > p2.sprite.body.x) {
+            if (p1.sprite.body.x + 90 > 1220)
+                tp.enableBody(
+                    true,
+                    p2.sprite.body.x - 90,
+                    p1.sprite.body.y,
+                    true,
+                    true
+                );
+            else
+                tp.enableBody(
+                    true,
+                    p1.sprite.body.x + 90,
+                    p1.sprite.body.y,
+                    true,
+                    true
+                );
+        } else {
+            if (p2.sprite.body.x + 90 > 1220)
+                tp.enableBody(
+                    true,
+                    p1.sprite.body.x - 90,
+                    p2.sprite.body.y,
+                    true,
+                    true
+                );
+            else
+                tp.enableBody(
+                    true,
+                    p2.sprite.body.x + 90,
+                    p2.sprite.body.y,
+                    true,
+                    true
+                );
+        }
+
+        p1.tp ? (p1.tp = false) : (p2.tp = false);
     }
 }
 
@@ -79,7 +160,7 @@ class playGame extends Phaser.Scene {
         super("PlayGame");
     }
     preload() {
-        this.load.image("sky", skyImg);
+        this.load.image("grass", grassImg);
         this.load.image("ground", groundImg);
         this.load.image("tp", tpImg);
         this.load.image("bomb", bombImg);
@@ -91,50 +172,68 @@ class playGame extends Phaser.Scene {
             frameWidth: 32,
             frameHeight: 32,
         });
+        this.load.spritesheet("cpu", cpuSprite, {
+            frameWidth: 32,
+            frameHeight: 32,
+        });
     }
     create() {
-        //background tpT
-        this.add.image(0, 0, "sky").setOrigin(0, 0);
+        //background START
+        this.add.image(0, 0, "grass").setOrigin(0, 0);
         //background END
 
-        //level code tpT
+        //level code START
         platforms = this.physics.add.staticGroup();
 
         //don't forget to set new hitboxes
-        platforms.create(1280, 0, "ground").setScale(26, 0.5).refreshBody(); //top
+        platforms.create(1280, 0, "ground").setScale(26, 3).refreshBody(); //top
         platforms.create(1280, 640, "ground").setScale(0.5, 13).refreshBody(); //right
         platforms.create(0, 640, "ground").setScale(26, 0.5).refreshBody(); //bottom
         platforms.create(0, 0, "ground").setScale(0.5, 13).refreshBody(); //left
 
-        //player code tpT
-        player.sprite = this.physics.add.sprite(100, 450, "dude").setInteractive();
+        //player code START
+        player.sprite = this.physics.add
+            .sprite(200, 300, "dude")
+            .setInteractive();
         player.sprite.body.allowGravity = false;
         player.sprite.setCollideWorldBounds(true);
-        player.sprite.body.setBounce(0.5);
-        
+        player.sprite.body.setBounce(1);
+
         this.anims.create({
             key: "turn",
             frames: [{ key: "dude", frame: 0 }],
         });
-        
         this.anims.create({
             key: "up",
             frames: [{ key: "dude", frame: 1 }],
         });
-
         this.anims.create({
-            key: "down",
+            key: "upright",
             frames: [{ key: "dude", frame: 2 }],
         });
-        
-        this.anims.create({
-            key: "left",
-            frames: [{ key: "dude", frame: 3 }],
-        });
-
         this.anims.create({
             key: "right",
+            frames: [{ key: "dude", frame: 3 }],
+        });
+        this.anims.create({
+            key: "downright",
             frames: [{ key: "dude", frame: 4 }],
+        });
+        this.anims.create({
+            key: "down",
+            frames: [{ key: "dude", frame: 5 }],
+        });
+        this.anims.create({
+            key: "downleft",
+            frames: [{ key: "dude", frame: 6 }],
+        });
+        this.anims.create({
+            key: "left",
+            frames: [{ key: "dude", frame: 7 }],
+        });
+        this.anims.create({
+            key: "upleft",
+            frames: [{ key: "dude", frame: 8 }],
         });
 
         this.physics.add.collider(player.sprite, platforms);
@@ -142,58 +241,186 @@ class playGame extends Phaser.Scene {
 
         //level objects
 
-        tp = this.physics.add.sprite(600, 150, "tp");
+        tp = this.physics.add.sprite(640, 185, "tp");
         tp.body.allowGravity = false;
 
         this.physics.add.overlap(player.sprite, tp, collectTP, null, this);
 
-        bot.sprite = this.physics.add.sprite(500, 450, "dude2").setInteractive();
-        bot.sprite.body.allowGravity = false;
-        bot.sprite.setCollideWorldBounds(true);
-        bot.sprite.body.setBounce(0.5);
+        player2.sprite = this.physics.add
+            .sprite(200, 450, "dude2")
+            .setInteractive();
+        player2.sprite.body.allowGravity = false;
+        player2.sprite.setCollideWorldBounds(true);
+        player2.sprite.body.setBounce(1);
 
-        this.physics.add.collider(bot.sprite, platforms);
+        this.physics.add.collider(player2.sprite, platforms);
 
         this.anims.create({
             key: "turn2",
             frames: [{ key: "dude2", frame: 0 }],
         });
-        
         this.anims.create({
             key: "up2",
             frames: [{ key: "dude2", frame: 1 }],
         });
-
         this.anims.create({
-            key: "down2",
+            key: "upright2",
             frames: [{ key: "dude2", frame: 2 }],
         });
-        
-        this.anims.create({
-            key: "left2",
-            frames: [{ key: "dude2", frame: 3 }],
-        });
-
         this.anims.create({
             key: "right2",
+            frames: [{ key: "dude2", frame: 3 }],
+        });
+        this.anims.create({
+            key: "downright2",
             frames: [{ key: "dude2", frame: 4 }],
         });
+        this.anims.create({
+            key: "down2",
+            frames: [{ key: "dude2", frame: 5 }],
+        });
+        this.anims.create({
+            key: "downleft2",
+            frames: [{ key: "dude2", frame: 6 }],
+        });
+        this.anims.create({
+            key: "left2",
+            frames: [{ key: "dude2", frame: 7 }],
+        });
+        this.anims.create({
+            key: "upleft2",
+            frames: [{ key: "dude2", frame: 8 }],
+        });
 
-        this.physics.add.collider(
-            player.sprite,
-            bot.sprite,
-            function ()
-            {
-                collision(player, bot);
-            });
+        this.physics.add.collider(player.sprite, player2.sprite, function () {
+            collision(player, player2);
+        });
 
-        this.physics.add.overlap(bot.sprite, tp, collectTP, null, this);
+        cpu.sprite = this.physics.add.sprite(1000, 200, "cpu").setInteractive();
+        cpu.sprite.body.allowGravity = false;
+        cpu.sprite.setCollideWorldBounds(true);
+        cpu.sprite.body.setBounce(1);
+        cpu.sprite.setVelocityX(-vel);
+        cpu.sprite.setVelocityY(vel);
 
-        player.scoreText = this.add.text(30, 35, 'player: initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
-        bot.scoreText = this.add.text(30, 70, 'bot: initial', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
+        this.physics.add.collider(player.sprite, cpu.sprite, function () {
+            collision(player, cpu);
+        });
 
-        player.covidText = this.add.text(250, 35, '', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
-        bot.covidText = this.add.text(250, 70, '', {fontFamily: 'Roboto', fontSize: '32px', fill: '#000'});
+        this.physics.add.collider(player2.sprite, cpu.sprite, function () {
+            collision(player2, cpu);
+        });
+
+        this.physics.add.collider(cpu.sprite, platforms);
+
+        cpu2.sprite = this.physics.add
+            .sprite(1000, 300, "cpu")
+            .setInteractive();
+        cpu2.sprite.body.allowGravity = false;
+        cpu2.sprite.setCollideWorldBounds(true);
+        cpu2.sprite.body.setBounce(1);
+        cpu2.sprite.setVelocityX(-vel);
+        cpu2.sprite.setVelocityY(-vel);
+
+        this.physics.add.collider(player.sprite, cpu2.sprite, function () {
+            collision(player, cpu2);
+        });
+
+        this.physics.add.collider(player2.sprite, cpu2.sprite, function () {
+            collision(player2, cpu2);
+        });
+
+        this.physics.add.collider(cpu2.sprite, platforms);
+
+        cpu3.sprite = this.physics.add
+            .sprite(1000, 400, "cpu")
+            .setInteractive();
+        cpu3.sprite.body.allowGravity = false;
+        cpu3.sprite.setCollideWorldBounds(true);
+        cpu3.sprite.body.setBounce(1);
+        cpu3.sprite.setVelocityX(-vel);
+        cpu3.sprite.setVelocityY(vel);
+
+        this.physics.add.collider(player.sprite, cpu3.sprite, function () {
+            collision(player, cpu3);
+        });
+
+        this.physics.add.collider(player2.sprite, cpu3.sprite, function () {
+            collision(player2, cpu3);
+        });
+
+        this.physics.add.collider(cpu3.sprite, platforms);
+
+        cpu4.sprite = this.physics.add
+            .sprite(1000, 500, "cpu")
+            .setInteractive();
+        cpu4.sprite.body.allowGravity = false;
+        cpu4.sprite.setCollideWorldBounds(true);
+        cpu4.sprite.body.setBounce(1);
+        cpu4.sprite.setVelocityX(-vel);
+        cpu4.sprite.setVelocityY(-vel);
+
+        this.physics.add.collider(player.sprite, cpu4.sprite, function () {
+            collision(player, cpu4);
+        });
+
+        this.physics.add.collider(player2.sprite, cpu4.sprite, function () {
+            collision(player2, cpu4);
+        });
+
+        this.physics.add.collider(cpu4.sprite, platforms);
+
+        this.physics.add.collider(cpu.sprite, cpu2.sprite, function () {
+            collision(cpu, cpu2);
+        });
+        this.physics.add.collider(cpu.sprite, cpu3.sprite, function () {
+            collision(cpu, cpu3);
+        });
+        this.physics.add.collider(cpu.sprite, cpu4.sprite, function () {
+            collision(cpu, cpu4);
+        });
+        this.physics.add.collider(cpu2.sprite, cpu3.sprite, function () {
+            collision(cpu2, cpu3);
+        });
+        this.physics.add.collider(cpu2.sprite, cpu4.sprite, function () {
+            collision(cpu2, cpu4);
+        });
+        this.physics.add.collider(cpu3.sprite, cpu4.sprite, function () {
+            collision(cpu3, cpu4);
+        });
+
+        this.physics.add.overlap(player2.sprite, tp, collectTP, null, this);
+        this.physics.add.overlap(cpu.sprite, tp, collectTP, null, this);
+        this.physics.add.overlap(cpu2.sprite, tp, collectTP, null, this);
+        this.physics.add.overlap(cpu3.sprite, tp, collectTP, null, this);
+        this.physics.add.overlap(cpu4.sprite, tp, collectTP, null, this);
+
+        player.icon = this.add.image(50, 35, "dude").setOrigin(0, 0);
+        player.tpStatus = this.add.image(90, 35, "tp").setOrigin(0, 0);
+        player2.icon = this.add.image(50, 70, "dude2").setOrigin(0, 0);
+        player2.tpStatus = this.add.image(90, 70, "tp").setOrigin(0, 0);
+        cpu.icon = this.add.image(1198, 35, "cpu").setOrigin(0, 0);
+        cpu.tpStatus = this.add.image(1158, 35, "tp").setOrigin(0, 0);
+        cpu2.icon = this.add.image(1198, 70, "cpu").setOrigin(0, 0);
+        cpu2.tpStatus = this.add.image(1158, 70, "tp").setOrigin(0, 0);
+
+        cpu3.icon = this.add.image(1098, 35, "cpu").setOrigin(0, 0);
+        cpu3.tpStatus = this.add.image(1058, 35, "tp").setOrigin(0, 0);
+        cpu4.icon = this.add.image(1098, 70, "cpu").setOrigin(0, 0);
+        cpu4.tpStatus = this.add.image(1058, 70, "tp").setOrigin(0, 0);
+
+        player.covidText = this.add.text(150, 35, "", {
+            fontFamily: "Roboto",
+            fontWeight: 700,
+            fontSize: "20px",
+            fill: "#000",
+        });
+        player2.covidText = this.add.text(150, 70, "", {
+            fontFamily: "Roboto",
+            fontWeight: 700,
+            fontSize: "20px",
+            fill: "#000",
+        });
         //level code END
     }
     update() {
@@ -210,113 +437,268 @@ class playGame extends Phaser.Scene {
             right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
         });
 
-        bnoDir = true;
-        noDir = true;
-
-        if (cursors.up.isDown) {
-            bot.sprite.setVelocityY(-vel);
-            bot.sprite.anims.play("up2", true);
-            bnoDir = false;
-        }
-        else if (cursors.down.isDown) {
-            bot.sprite.setVelocityY(vel);
-            bot.sprite.anims.play("down2", true);
-            bnoDir = false;
-        }
-        else {
-            bot.sprite.setVelocityY(0);
-        }
-
-        if (cursors.left.isDown) {
-            bot.sprite.setVelocityX(-vel);
-            bot.sprite.anims.play("left2", true);
-            bnoDir = false;
-        }
-        else if (cursors.right.isDown) {
-            bot.sprite.setVelocityX(vel);
-            bot.sprite.anims.play("right2", true);
-            bnoDir = false;
-        }
-        else {
-            bot.sprite.setVelocityX(0);
-        }
-
-        if (bnoDir) {
-            bot.sprite.anims.play("turn2");
-        }
-
-        if (cursors.w.isDown) {
-            player.sprite.setVelocityY(-vel);
-            player.sprite.anims.play("up", true);
-            noDir = false;
-        }
-        else if (cursors.s.isDown) {
-            player.sprite.setVelocityY(vel);
-            player.sprite.anims.play("down", true);
-            noDir = false;
-        }
-        else {
-            player.sprite.setVelocityY(0);
-        }
-
-        if (cursors.a.isDown) {
-            player.sprite.setVelocityX(-vel);
-            player.sprite.anims.play("left", true);
-            noDir = false;
-        }
-        else if (cursors.d.isDown) {
-            player.sprite.setVelocityX(vel);
-            player.sprite.anims.play("right", true);
-            noDir = false;
-        }
-        else {
+        if (cursors.w.isDown && cursors.d.isDown) {
+            player.tp
+                ? player.sprite.setVelocityX(vel * 0.92)
+                : player.sprite.setVelocityX(vel);
+            player.tp
+                ? player.sprite.setVelocityY(-vel * 0.92)
+                : player.sprite.setVelocityY(-vel);
+            player.sprite.anims.play("upright", true);
+        } else if (cursors.w.isDown && cursors.a.isDown) {
+            player.tp
+                ? player.sprite.setVelocityX(-vel * 0.92)
+                : player.sprite.setVelocityX(-vel);
+            player.tp
+                ? player.sprite.setVelocityY(-vel * 0.92)
+                : player.sprite.setVelocityY(-vel);
+            player.sprite.anims.play("upleft", true);
+        } else if (cursors.s.isDown && cursors.d.isDown) {
+            player.tp
+                ? player.sprite.setVelocityX(vel * 0.92)
+                : player.sprite.setVelocityX(vel);
+            player.tp
+                ? player.sprite.setVelocityY(vel * 0.92)
+                : player.sprite.setVelocityY(vel);
+            player.sprite.anims.play("downright", true);
+        } else if (cursors.s.isDown && cursors.a.isDown) {
+            player.tp
+                ? player.sprite.setVelocityX(-vel * 0.92)
+                : player.sprite.setVelocityX(-vel);
+            player.tp
+                ? player.sprite.setVelocityY(vel * 0.92)
+                : player.sprite.setVelocityY(vel);
+            player.sprite.anims.play("downleft", true);
+        } else if (cursors.w.isDown) {
             player.sprite.setVelocityX(0);
-        }
-
-        if (noDir) {
-            player.sprite.anims.play("turn");
-        }
-
-        /*if (cursors.up.isDown || cursors.w.isDown) {
-            player.sprite.setVelocityY(-vel);
+            player.tp
+                ? player.sprite.setVelocityY(-vel * 0.92)
+                : player.sprite.setVelocityY(-vel);
             player.sprite.anims.play("up", true);
-            noDir = false;
-        }
-        else if (cursors.down.isDown || cursors.s.isDown) {
-            player.sprite.setVelocityY(vel);
-            player.sprite.anims.play("down", true);
-            noDir = false;
-        }
-
-        if (cursors.left.isDown || cursors.a.isDown) {
-            player.sprite.setVelocityX(-vel);
+        } else if (cursors.a.isDown) {
+            player.tp
+                ? player.sprite.setVelocityX(-vel * 0.92)
+                : player.sprite.setVelocityX(-vel);
+            player.sprite.setVelocityY(0);
             player.sprite.anims.play("left", true);
-            noDir = false;
-        }
-        else if (cursors.right.isDown || cursors.d.isDown) {
-            player.sprite.setVelocityX(vel);
+        } else if (cursors.s.isDown) {
+            player.sprite.setVelocityX(0);
+            player.tp
+                ? player.sprite.setVelocityY(vel * 0.92)
+                : player.sprite.setVelocityY(vel);
+            player.sprite.anims.play("down", true);
+        } else if (cursors.d.isDown) {
+            player.tp
+                ? player.sprite.setVelocityX(vel * 0.92)
+                : player.sprite.setVelocityX(vel);
+            player.sprite.setVelocityY(0);
             player.sprite.anims.play("right", true);
-            noDir = false;
-        }
-
-        if (noDir) {
+        } else {
             player.sprite.setVelocityX(0);
             player.sprite.setVelocityY(0);
             player.sprite.anims.play("turn");
-        }*/
-
-        if(player.covid) {
-            if(!player.timedEvent) {
-                player.timedEvent = this.time.delayedCall(30000, die, [player.sprite], this);
-            }
-            player.covidText.setText('covid timer: ' + (30 - (30 *player.timedEvent.getProgress())).toString().substr(0, 4));
         }
-        
-        if(bot.covid) {
-            if(!bot.timedEvent) {
-                bot.timedEvent = this.time.delayedCall(30000, die, [bot.sprite], this);
+
+        if (cursors.up.isDown && cursors.right.isDown) {
+            player2.tp
+                ? player2.sprite.setVelocityX(vel * 0.92)
+                : player2.sprite.setVelocityX(vel);
+            player2.tp
+                ? player2.sprite.setVelocityY(-vel * 0.92)
+                : player2.sprite.setVelocityY(-vel);
+            player2.sprite.anims.play("upright2", true);
+        } else if (cursors.up.isDown && cursors.left.isDown) {
+            player2.tp
+                ? player2.sprite.setVelocityX(-vel * 0.92)
+                : player2.sprite.setVelocityX(-vel);
+            player2.tp
+                ? player2.sprite.setVelocityY(-vel * 0.92)
+                : player2.sprite.setVelocityY(-vel);
+            player2.sprite.anims.play("upleft2", true);
+        } else if (cursors.down.isDown && cursors.right.isDown) {
+            player2.tp
+                ? player2.sprite.setVelocityX(vel * 0.92)
+                : player2.sprite.setVelocityX(vel);
+            player2.tp
+                ? player2.sprite.setVelocityY(vel * 0.92)
+                : player2.sprite.setVelocityY(vel);
+            player2.sprite.anims.play("downright2", true);
+        } else if (cursors.down.isDown && cursors.left.isDown) {
+            player2.tp
+                ? player2.sprite.setVelocityX(-vel * 0.92)
+                : player2.sprite.setVelocityX(-vel);
+            player2.tp
+                ? player2.sprite.setVelocityY(vel * 0.92)
+                : player2.sprite.setVelocityY(vel);
+            player2.sprite.anims.play("downleft2", true);
+        } else if (cursors.up.isDown) {
+            player2.sprite.setVelocityX(0);
+            player2.tp
+                ? player2.sprite.setVelocityY(-vel * 0.92)
+                : player2.sprite.setVelocityY(-vel);
+            player2.sprite.anims.play("up2", true);
+        } else if (cursors.left.isDown) {
+            player2.tp
+                ? player2.sprite.setVelocityX(-vel * 0.92)
+                : player2.sprite.setVelocityX(-vel);
+            player2.sprite.setVelocityY(0);
+            player2.sprite.anims.play("left2", true);
+        } else if (cursors.down.isDown) {
+            player2.sprite.setVelocityX(0);
+            player2.tp
+                ? player2.sprite.setVelocityY(vel * 0.92)
+                : player2.sprite.setVelocityY(vel);
+            player2.sprite.anims.play("down2", true);
+        } else if (cursors.right.isDown) {
+            player2.tp
+                ? player2.sprite.setVelocityX(vel * 0.92)
+                : player2.sprite.setVelocityX(vel);
+            player2.sprite.setVelocityY(0);
+            player2.sprite.anims.play("right2", true);
+        } else {
+            player2.sprite.setVelocityX(0);
+            player2.sprite.setVelocityY(0);
+            player2.sprite.anims.play("turn2");
+        }
+
+        if (player.covid) {
+            if (!player.timedEvent) {
+                player.timedEvent = this.time.delayedCall(
+                    30000,
+                    die,
+                    [player.sprite],
+                    this
+                );
             }
-            bot.covidText.setText('covid timer: ' + (30 - (30 *bot.timedEvent.getProgress())).toString().substr(0, 4));
+            if (30 * player.timedEvent.getProgress() < 20) {
+                player.covidText.setText(
+                    "You got COVID! Time until death: " +
+                        (30 - 30 * player.timedEvent.getProgress())
+                            .toString()
+                            .substr(0, 4)
+                );
+            } else if (player.timedEvent.getProgress() === 1) {
+                player.covidText.setText("You died. :(");
+                player.dead = true;
+            } else {
+                player.covidText.setText(
+                    "You got COVID! Time until death: " +
+                        (30 - 30 * player.timedEvent.getProgress())
+                            .toString()
+                            .substr(0, 3)
+                );
+            }
+        }
+
+        if(player.dead) {
+            player.icon.setTexture("dude", 9);
+            if(player.tp) {
+                tp.enableBody(
+                    true,
+                    player.sprite.body.x,
+                    player.sprite.body.y,
+                    true,
+                    true
+                );
+            }
+        }
+
+        if (player2.covid) {
+            if (!player2.timedEvent) {
+                player2.timedEvent = this.time.delayedCall(
+                    30000,
+                    die,
+                    [player2.sprite],
+                    this
+                );
+            }
+            if (30 * player2.timedEvent.getProgress() < 20) {
+                player2.covidText.setText(
+                    "You got COVID! Time until death: " +
+                        (30 - 30 * player2.timedEvent.getProgress())
+                            .toString()
+                            .substr(0, 4)
+                );
+            } else if (player2.timedEvent.getProgress() === 1) {
+                player2.covidText.setText("You died. :(");
+                player2.dead = true;
+            } else {
+                player2.covidText.setText(
+                    "You got COVID! Time until death: " +
+                        (30 - 30 * player2.timedEvent.getProgress())
+                            .toString()
+                            .substr(0, 3)
+                );
+            }
+        }
+
+        if(player2.dead) {
+            player2.icon.setTexture("dude2", 9);
+            if(player2.tp) {
+                tp.enableBody(
+                    true,
+                    player2.sprite.body.x,
+                    player2.sprite.body.y,
+                    true,
+                    true
+                );
+            }
+        }
+
+        if (cpu.sprite.body.velocity.x === 0) {
+            cpu.sprite.setVelocityX(-vel);
+        }
+        if (cpu.sprite.body.velocity.y === 0) {
+            cpu.sprite.setVelocityY(vel);
+        }
+        if (cpu2.sprite.body.velocity.x === 0) {
+            cpu2.sprite.setVelocityX(-vel);
+        }
+        if (cpu2.sprite.body.velocity.y === 0) {
+            cpu2.sprite.setVelocityY(-vel);
+        }
+        if (cpu3.sprite.body.velocity.x === 0) {
+            cpu3.sprite.setVelocityX(-vel);
+        }
+        if (cpu3.sprite.body.velocity.y === 0) {
+            cpu3.sprite.setVelocityY(vel);
+        }
+        if (cpu4.sprite.body.velocity.x === 0) {
+            cpu4.sprite.setVelocityX(-vel);
+        }
+        if (cpu4.sprite.body.velocity.y === 0) {
+            cpu4.sprite.setVelocityY(-vel);
+        }
+
+        if (player.tp) {
+            player.tpStatus.visible = true;
+        } else {
+            player.tpStatus.visible = false;
+        }
+        if (player2.tp) {
+            player2.tpStatus.visible = true;
+        } else {
+            player2.tpStatus.visible = false;
+        }
+        if (cpu.tp) {
+            cpu.tpStatus.visible = true;
+        } else {
+            cpu.tpStatus.visible = false;
+        }
+        if (cpu2.tp) {
+            cpu2.tpStatus.visible = true;
+        } else {
+            cpu2.tpStatus.visible = false;
+        }
+        if (cpu3.tp) {
+            cpu3.tpStatus.visible = true;
+        } else {
+            cpu3.tpStatus.visible = false;
+        }
+        if (cpu4.tp) {
+            cpu4.tpStatus.visible = true;
+        } else {
+            cpu4.tpStatus.visible = false;
         }
     }
 }

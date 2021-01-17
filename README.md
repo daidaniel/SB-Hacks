@@ -1,6 +1,6 @@
 # SB-Hacks project: The 2020 Experience
 
-Before running, install:
+CLone the repository, navigate to the directory and install:
 <pre><code>npm install
 </code></pre>
 

@@ -9,7 +9,7 @@ import cpuSprite from "../assets/cpu.png";
 import houseImg from "../assets/house.png";
 import house2Img from "../assets/house2.png";
 import overlayImg from "../assets/overlay.png";
-// import musictodelight from "../assets/musictodelight.mp3";
+import musictodelight from "../assets/musictodelight.mp3";
 
 var cpu = {
     name: "cpu",
@@ -74,6 +74,7 @@ var overlay;
 var startText;
 var timer;
 var started = false;
+let sfx;
 
 const vel = 180;
 
@@ -190,11 +191,11 @@ class playGame extends Phaser.Scene {
         this.load.image("house", houseImg);
         this.load.image("house2", house2Img);
         this.load.image("overlay", overlayImg);
-        // this.load.audio("musictodelight", musictodelight);
+        this.load.audio("musictodelight", musictodelight);
     }
     create() {
-        // let sfx = this.sound.add("musictodelight", {loop: true});
-        // sfx.play();
+        sfx = this.sound.add("musictodelight", {loop: true});
+        sfx.play();
         this.scene.stop("menu");
 
         //background START
@@ -737,6 +738,7 @@ class playGame extends Phaser.Scene {
                     message: "Player 1 Wins!",
                     player: 1,
                 });
+                sfx.stop();
                 started = false;
                 player.win = false;
                 player.tp = false;
@@ -757,6 +759,7 @@ class playGame extends Phaser.Scene {
                     message: "Player 2 Wins!",
                     player: 2,
                 });
+                sfx.stop();
                 started = false;
                 player2.win = false;
                 player2.tp = false;
@@ -777,6 +780,7 @@ class playGame extends Phaser.Scene {
                     message: "Everyone died :(",
                     player: 0,
                 });
+                sfx.stop();
                 started = false;
                 player.win = false;
                 player2.win = false;

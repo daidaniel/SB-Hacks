@@ -1,6 +1,8 @@
 # SB-Hacks project: The 2020 Experience
 
-CLone the repository, navigate to the directory and install:
+Make sure you have [Node.js](https://nodejs.org/en/download/) installed.
+
+CLone the repository/download the ZIP file, navigate to the directory and install dependencies:
 <pre><code>npm install
 </code></pre>
 

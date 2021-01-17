@@ -486,7 +486,7 @@ class playGame extends Phaser.Scene {
         startText = this.add.text(640, 320, "", {
             fontFamily: "Roboto",
             fontWeight: 700,
-            fontSize: "28px",
+            fontSize: "32px",
             fill: "#000",
         });
 
@@ -733,7 +733,7 @@ class playGame extends Phaser.Scene {
 
             if (player.win) {
                 //display winscreen
-                this.scene.start("EndGame", {
+                this.scene.launch("EndGame", {
                     message: "Player 1 Wins!",
                     player: 1,
                 });
@@ -753,7 +753,7 @@ class playGame extends Phaser.Scene {
             }
             if (player2.win) {
                 //display winscreen
-                this.scene.start("EndGame", {
+                this.scene.launch("EndGame", {
                     message: "Player 2 Wins!",
                     player: 2,
                 });
@@ -773,10 +773,24 @@ class playGame extends Phaser.Scene {
             }
 
             if (player.dead && player2.dead) {
-                this.scene.start("EndGame", {
+                this.scene.launch("EndGame", {
                     message: "Everyone died :(",
                     player: 0,
                 });
+                started = false;
+                player.win = false;
+                player2.win = false;
+                player2.tp = false;
+                player.covid = false;
+                player.timedEvent = null;
+                player.dead = false;
+                player2.covid = false;
+                player2.timedEvent = null;
+                player2.dead = false;
+                cpu.tp = false;
+                cpu2.tp = false;
+                cpu3.tp = false;
+                cpu4.tp = false;
             }
 
             if (cpu.sprite.body.velocity.x === 0) {
